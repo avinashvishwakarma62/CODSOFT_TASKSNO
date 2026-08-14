@@ -1,47 +1,132 @@
+import tkinter as tk
 import random
 
-print("===== ROCK PAPER SCISSORS =====")
 
 user_score = 0
 computer_score = 0
 
-while True:
-    print("\nChoose one:")
-    print("1. Rock")
-    print("2. Paper")
-    print("3. Scissors")
-    print("4. Exit")
+options = ["Rock", "Paper", "Scissors"]
 
-    choice = input("Enter your choice: ")
 
-    if choice == "4":
-        print("\nFinal Score")
-        print("You:", user_score)
-        print("Computer:", computer_score)
-        print("Thanks for playing!")
-        break
+def play(user_choice):
+    global user_score, computer_score
 
-    if choice not in ["1", "2", "3"]:
-        print("Invalid choice.")
-        continue
-
-    options = ["Rock", "Paper", "Scissors"]
-    user_choice = options[int(choice) - 1]
     computer_choice = random.choice(options)
 
-    print("You chose:", user_choice)
-    print("Computer chose:", computer_choice)
+    user_label.config(
+        text="Your Choice: " + user_choice
+    )
+
+    computer_label.config(
+        text="Computer Choice: " + computer_choice
+    )
 
     if user_choice == computer_choice:
-        print("It's a tie!")
+        result_label.config(text="It's a Tie!")
 
-    elif (user_choice == "Rock" and computer_choice == "Scissors") or \
-         (user_choice == "Paper" and computer_choice == "Rock") or \
-         (user_choice == "Scissors" and computer_choice == "Paper"):
-
-        print("You win!")
+    elif (
+        (user_choice == "Rock" and computer_choice == "Scissors")
+        or
+        (user_choice == "Paper" and computer_choice == "Rock")
+        or
+        (user_choice == "Scissors" and computer_choice == "Paper")
+    ):
+        result_label.config(text="You Win!")
         user_score += 1
 
     else:
-        print("Computer wins!")
+        result_label.config(text="Computer Wins!")
         computer_score += 1
+
+    score_label.config(
+        text=f"Score  You: {user_score}    Computer: {computer_score}"
+    )
+
+
+def reset_game():
+    global user_score, computer_score
+
+    user_score = 0
+    computer_score = 0
+
+    user_label.config(text="Your Choice: ")
+    computer_label.config(text="Computer Choice: ")
+    result_label.config(text="Choose your move!")
+    score_label.config(text="Score  You: 0    Computer: 0")
+
+
+root = tk.Tk()
+root.title("Rock Paper Scissors")
+root.geometry("550x550")
+root.resizable(False, False)
+
+title = tk.Label(
+    root,
+    text="ROCK PAPER SCISSORS",
+    font=("Arial", 22, "bold")
+)
+title.pack(pady=30)
+
+result_label = tk.Label(
+    root,
+    text="Choose your move!",
+    font=("Arial", 18, "bold")
+)
+result_label.pack(pady=20)
+
+user_label = tk.Label(
+    root,
+    text="Your Choice: ",
+    font=("Arial", 13)
+)
+user_label.pack(pady=5)
+
+computer_label = tk.Label(
+    root,
+    text="Computer Choice: ",
+    font=("Arial", 13)
+)
+computer_label.pack(pady=5)
+
+button_frame = tk.Frame(root)
+button_frame.pack(pady=30)
+
+tk.Button(
+    button_frame,
+    text="Rock",
+    width=12,
+    height=2,
+    command=lambda: play("Rock")
+).grid(row=0, column=0, padx=8)
+
+tk.Button(
+    button_frame,
+    text="Paper",
+    width=12,
+    height=2,
+    command=lambda: play("Paper")
+).grid(row=0, column=1, padx=8)
+
+tk.Button(
+    button_frame,
+    text="Scissors",
+    width=12,
+    height=2,
+    command=lambda: play("Scissors")
+).grid(row=0, column=2, padx=8)
+
+score_label = tk.Label(
+    root,
+    text="Score  You: 0    Computer: 0",
+    font=("Arial", 14, "bold")
+)
+score_label.pack(pady=20)
+
+tk.Button(
+    root,
+    text="Reset Game",
+    width=18,
+    command=reset_game
+).pack(pady=10)
+
+root.mainloop()

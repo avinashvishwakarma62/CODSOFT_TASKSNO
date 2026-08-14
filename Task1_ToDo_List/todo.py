@@ -1,119 +1,147 @@
+import tkinter as tk
+from tkinter import messagebox
+from tkinter import ttk
+
 tasks = []
 
+
 def add_task():
-    task = input("Enter your task: ")
+    task = task_entry.get().strip()
 
-    if task.strip() == "":
-        print("Task cannot be empty.")
-    else:
-        tasks.append({"task": task, "status": "Pending"})
-        print("Task added successfully.")
-
-
-def view_tasks():
-    if len(tasks) == 0:
-        print("No tasks available.")
+    if task == "":
+        messagebox.showwarning("Warning", "Please enter a task.")
         return
 
-    print("\nYour Tasks:")
-    for i in range(len(tasks)):
-        print(f"{i + 1}. {tasks[i]['task']} - {tasks[i]['status']}")
+    tasks.append([task, "Pending"])
+    task_entry.delete(0, tk.END)
+    show_tasks()
+
+
+def show_tasks():
+    task_list.delete(*task_list.get_children())
+
+    for i, task in enumerate(tasks):
+        task_list.insert(
+            "",
+            tk.END,
+            iid=i,
+            values=(task[0], task[1])
+        )
 
 
 def update_task():
-    view_tasks()
+    selected = task_list.selection()
 
-    if len(tasks) == 0:
+    if not selected:
+        messagebox.showwarning("Warning", "Select a task first.")
         return
 
-    try:
-        number = int(input("Enter task number to update: "))
+    index = int(selected[0])
+    new_task = task_entry.get().strip()
 
-        if number >= 1 and number <= len(tasks):
-            new_task = input("Enter new task: ")
-
-            if new_task.strip() != "":
-                tasks[number - 1]["task"] = new_task
-                print("Task updated successfully.")
-            else:
-                print("Task cannot be empty.")
-        else:
-            print("Invalid task number.")
-
-    except ValueError:
-        print("Please enter a number.")
-
-
-def delete_task():
-    view_tasks()
-
-    if len(tasks) == 0:
+    if new_task == "":
+        messagebox.showwarning("Warning", "Enter the new task.")
         return
 
-    try:
-        number = int(input("Enter task number to delete: "))
-
-        if number >= 1 and number <= len(tasks):
-            tasks.pop(number - 1)
-            print("Task deleted successfully.")
-        else:
-            print("Invalid task number.")
-
-    except ValueError:
-        print("Please enter a number.")
+    tasks[index][0] = new_task
+    task_entry.delete(0, tk.END)
+    show_tasks()
 
 
 def complete_task():
-    view_tasks()
+    selected = task_list.selection()
 
-    if len(tasks) == 0:
+    if not selected:
+        messagebox.showwarning("Warning", "Select a task first.")
         return
 
-    try:
-        number = int(input("Enter task number to complete: "))
-
-        if number >= 1 and number <= len(tasks):
-            tasks[number - 1]["status"] = "Completed"
-            print("Task marked as completed.")
-        else:
-            print("Invalid task number.")
-
-    except ValueError:
-        print("Please enter a number.")
+    index = int(selected[0])
+    tasks[index][1] = "Completed"
+    show_tasks()
 
 
-while True:
+def delete_task():
+    selected = task_list.selection()
 
-    print("\n==============================")
-    print("        TO-DO LIST")
-    print("==============================")
-    print("1. Add Task")
-    print("2. View Tasks")
-    print("3. Update Task")
-    print("4. Delete Task")
-    print("5. Complete Task")
-    print("6. Exit")
+    if not selected:
+        messagebox.showwarning("Warning", "Select a task first.")
+        return
 
-    choice = input("Enter your choice: ")
+    index = int(selected[0])
+    tasks.pop(index)
+    show_tasks()
 
-    if choice == "1":
-        add_task()
 
-    elif choice == "2":
-        view_tasks()
+def select_task(event):
+    selected = task_list.selection()
 
-    elif choice == "3":
-        update_task()
+    if selected:
+        index = int(selected[0])
+        task_entry.delete(0, tk.END)
+        task_entry.insert(0, tasks[index][0])
 
-    elif choice == "4":
-        delete_task()
 
-    elif choice == "5":
-        complete_task()
+root = tk.Tk()
+root.title("My To-Do List")
+root.geometry("700x500")
+root.resizable(False, False)
 
-    elif choice == "6":
-        print("Thank you for using To-Do List!")
-        break
+style = ttk.Style()
+style.theme_use("clam")
 
-    else:
-        print("Invalid choice. Please try again.")
+title = tk.Label(
+    root,
+    text="MY TO-DO LIST",
+    font=("Arial", 24, "bold")
+)
+title.pack(pady=20)
+
+task_entry = ttk.Entry(root, width=55, font=("Arial", 12))
+task_entry.pack(pady=10)
+
+add_button = ttk.Button(
+    root,
+    text="+ Add Task",
+    command=add_task
+)
+add_button.pack(pady=5)
+
+task_list = ttk.Treeview(
+    root,
+    columns=("Task", "Status"),
+    show="headings",
+    height=12
+)
+
+task_list.heading("Task", text="Task")
+task_list.heading("Status", text="Status")
+
+task_list.column("Task", width=470)
+task_list.column("Status", width=150)
+
+task_list.pack(pady=15)
+
+task_list.bind("<<TreeviewSelect>>", select_task)
+
+button_frame = tk.Frame(root)
+button_frame.pack(pady=10)
+
+ttk.Button(
+    button_frame,
+    text="Update",
+    command=update_task
+).grid(row=0, column=0, padx=5)
+
+ttk.Button(
+    button_frame,
+    text="Complete",
+    command=complete_task
+).grid(row=0, column=1, padx=5)
+
+ttk.Button(
+    button_frame,
+    text="Delete",
+    command=delete_task
+).grid(row=0, column=2, padx=5)
+
+root.mainloop()
